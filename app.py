@@ -185,8 +185,8 @@ def pestana_registro():
 
     df = pd.DataFrame(st.session_state.registros, columns=COLUMNAS)
     st.write(f"**Registros en esta sesión: {len(df)}**")
-    if len(df):
-        st.dataframe(df)
+   if len(df):
+    st.table(df)
         a, b = st.columns(2)
         csv = df.to_csv(index=False).encode("utf-8-sig")
         a.download_button("Descargar CSV", csv, file_name="registros_alfalfa.csv", mime="text/csv")
