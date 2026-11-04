@@ -278,7 +278,7 @@ def pestana_entrenar():
             st.warning("Ningún modelo supera a la línea base (predecir siempre la clase mayoritaria). "
                        "Con estos datos el aprendizaje no aporta; repórtalo así.")
         st.write("**Métricas de validación** (cada lote se reserva una vez como prueba)")
-        st.dataframe(res["tg"])
+st.table(res["tg"])
         st.write("**Matrices de confusión** (suma de todas las pruebas)")
         for nombre, cm in res["mats"].items():
             st.write(nombre)
