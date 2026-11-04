@@ -1,0 +1,8 @@
+streamlit
+pandas
+numpy
+joblib
+# IMPORTANTE: fija aquí la MISMA versión de scikit-learn con la que entrenaste el modelo.
+# Para saberla, en tu computador ejecuta:  pip show scikit-learn
+# y escribe, por ejemplo:  scikit-learn==1.5.2
+scikit-learn
