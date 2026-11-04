@@ -5,7 +5,7 @@ Prototipo web: riesgo de plagas en alfalfa, Valle Jequetepeque.
 Pestañas:
   1. Registrar visita     -> ficha digital para construir el dataset desde el celular.
   2. Entrenar con mis datos -> el programa aprende de las visitas (elige cuántas fechas usar),
-                              muestra métricas reales y matriz de confusión.
+                               muestra métricas reales y matriz de confusión.
   3. Estimar riesgo       -> usa el modelo entrenado en la sesión o el de la carpeta modelo/.
   4. Acerca de            -> descripción, métricas y limitaciones.
 
@@ -185,8 +185,8 @@ def pestana_registro():
 
     df = pd.DataFrame(st.session_state.registros, columns=COLUMNAS)
     st.write(f"**Registros en esta sesión: {len(df)}**")
-   if len(df):
-    st.table(df)
+    if len(df):
+        st.table(df)
         a, b = st.columns(2)
         csv = df.to_csv(index=False).encode("utf-8-sig")
         a.download_button("Descargar CSV", csv, file_name="registros_alfalfa.csv", mime="text/csv")
@@ -278,16 +278,16 @@ def pestana_entrenar():
             st.warning("Ningún modelo supera a la línea base (predecir siempre la clase mayoritaria). "
                        "Con estos datos el aprendizaje no aporta; repórtalo así.")
         st.write("**Métricas de validación** (cada lote se reserva una vez como prueba)")
-st.table(res["tg"])
+        st.table(res["tg"])
         st.write("**Matrices de confusión** (suma de todas las pruebas)")
-       for nombre, cm in res["mats"].items():
-    st.write(nombre)
-    st.table(pd.DataFrame(cm, index=["Real: bajo", "Real: alto"],
-                          columns=["Predicho: bajo", "Predicho: alto"]))
+        for nombre, cm in res["mats"].items():
+            st.write(nombre)
+            st.table(pd.DataFrame(cm, index=["Real: bajo", "Real: alto"],
+                                  columns=["Predicho: bajo", "Predicho: alto"]))
         with st.expander("Reglas aprendidas por el árbol CART"):
             st.code(res["reglas"])
-       with st.expander("Resultados por lote de prueba"):
-    st.table(res["tl"])
+        with st.expander("Resultados por lote de prueba"):
+            st.table(res["tl"])
         buf = io.BytesIO()
         joblib.dump(res["modelo"], buf)
         d1, d2, d3 = st.columns(3)
@@ -320,12 +320,12 @@ def pestana_acerca(modelo, meta):
         st.write(f"**Modelo cargado:** {meta.get('modelo', 'desconocido')}. "
                  f"**Variables:** {', '.join(meta.get('variables', []))}.")
     f_met = RUTA_MODELO / "metricas_globales.csv"
-   if sesion is not None:
-    st.write("**Métricas de validación** (modelo entrenado en esta sesión):")
-    st.table(sesion["tg"])
-elif f_met.exists():
-    st.write("**Métricas de validación** (cada lote se reservó una vez como prueba):")
-    st.table(pd.read_csv(f_met))
+    if sesion is not None:
+        st.write("**Métricas de validación** (modelo entrenado en esta sesión):")
+        st.table(sesion["tg"])
+    elif f_met.exists():
+        st.write("**Métricas de validación** (cada lote se reservó una vez como prueba):")
+        st.table(pd.read_csv(f_met))
     else:
         st.caption("Las métricas aparecerán aquí cuando se copie `metricas_globales.csv` a la carpeta `modelo/`.")
     st.write("**Limitaciones**")
