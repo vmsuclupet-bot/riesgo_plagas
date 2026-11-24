@@ -205,6 +205,76 @@ def aplicar_estilo():
         font-size: 12px;
         padding-top: 25px;
     }
+
+    /* Overrides para evitar el color rojo del tema de Streamlit */
+    :root {
+        --primary-color: #238653;
+        --secondary-background-color: #edf5ef;
+        --text-color: #20352b;
+    }
+    [data-testid="stAppViewContainer"] {
+        background: #f1f6f2;
+    }
+    [data-testid="stHeader"] {
+        background: rgba(241, 246, 242, 0.85);
+    }
+    [data-baseweb="tab-highlight"],
+    [data-baseweb="tab-border"] {
+        background-color: #238653 !important;
+    }
+    button[role="tab"][aria-selected="true"] {
+        color: #17633e !important;
+        background: #e0f2e6 !important;
+        border-bottom: 3px solid #238653 !important;
+    }
+    button[role="tab"] {
+        border-radius: 12px !important;
+        font-size: 14px !important;
+        min-height: 48px !important;
+    }
+    [data-testid="stSlider"] [data-baseweb="slider"] div[role="slider"] {
+        background-color: #238653 !important;
+        border-color: #238653 !important;
+    }
+    [data-testid="stSlider"] [data-baseweb="slider"] > div > div {
+        background-color: #238653 !important;
+    }
+    input:focus, textarea:focus {
+        border-color: #238653 !important;
+        box-shadow: 0 0 0 1px #238653 !important;
+    }
+    .stSelectbox [data-baseweb="select"]:focus-within,
+    .stDateInput [data-baseweb="input"]:focus-within {
+        border-color: #238653 !important;
+    }
+    /* Títulos y textos con mejor jerarquía */
+    .stMarkdown p {
+        line-height: 1.65;
+    }
+    [data-testid="stVerticalBlock"] > [data-testid="stForm"] {
+        margin-top: 12px;
+    }
+    /* Mejor aspecto en pantallas pequeñas */
+    @media (max-width: 768px) {
+        .block-container {
+            padding: 1rem 1rem 2rem;
+        }
+        .encabezado {
+            padding: 23px 20px;
+            border-radius: 17px;
+        }
+        .encabezado h1 {
+            font-size: 26px !important;
+        }
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 3px;
+            padding: 5px;
+        }
+        .stTabs [data-baseweb="tab"] {
+            padding: 0 8px;
+            font-size: 12px;
+        }
+    }
     </style>
     """, unsafe_allow_html=True)
 
