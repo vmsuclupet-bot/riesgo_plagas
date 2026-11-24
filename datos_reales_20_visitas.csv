@@ -1,0 +1,21 @@
+﻿fecha,lote,dias_desde_corte,riegos_ciclo,fumigaciones_ciclo,temp_media_c,humedad_media_pct,cobertura_maleza,nivel_plaga,observaciones
+2026-10-15,L1,2,0,0,26.5,74.0,0,0,Lote limpio al empezar el registro. Sin maleza ni plagas por el momento.
+2026-10-16,L2,3,0,0,26.8,74.0,0,1,Primeros brotes del cultivo. Se nota la aparicion de unos pocos bichos.
+2026-10-18,L1,5,1,0,27.1,68.5,1,1,Se aplico el primer riego del ciclo. El calor empieza a subir a mediodia.
+2026-10-19,L3,6,1,0,27.5,66.0,1,1,Las plantas crecen de forma normal. Hay mucha sensacion de bochorno en la zona.
+2026-10-21,L4,8,1,0,27.8,65.2,1,2,La plaga subio a nivel 2 debido a los dias calurosos.
+2026-10-23,L3,10,2,1,28.0,64.0,2,2,Se realizo la primera fumigacion para frenar el aumento de los bichos.
+2026-10-25,L1,12,2,1,28.8,64.5,2,1,El veneno funciono a medias porque el fuerte calor hace que la plaga resista mas.
+2026-10-26,L2,13,2,2,29.2,65.0,2,2,Dia de calor extremo segun SENAMHI. Las plantas sienten el impacto del clima.
+2026-10-28,L4,15,2,2,28.9,67.2,2,2,La plaga sigue activa en nivel 2 por el ambiente tan seco y calido.
+2026-10-29,L1,16,3,2,28.5,68.0,2,3,Alerta: La plaga subio a nivel critico 3 por la acumulacion de dias calurosos.
+2026-10-31,L3,18,3,2,28.1,69.0,2,2,Bajo un poco la presion de los bichos al calmarse la ola de calor.
+2026-10-31,L4,18,2,2,28.1,69.0,2,2,El suelo se esta secando muy rapido; se sugiere adelantar el proximo riego.
+2026-11-01,L1,19,4,3,27.5,70.5,1,1,La tercera fumigacion dio buen resultado. La plaga bajo a nivel 1.
+2026-11-01,L2,19,3,2,27.5,70.5,2,2,El clima empieza a refrescar y corre mas viento por la tarde.
+2026-11-02,L3,20,4,2,26.8,72.0,2,1,El clima vuelve a lo normal de la epoca. Comportamiento de la plaga bajo control.
+2026-11-02,L4,20,3,2,26.8,72.0,1,1,El lote se va estabilizando gracias al cambio de clima mas fresco.
+2026-11-03,L1,21,4,3,26.2,73.5,1,1,Buen crecimiento de las plantas hoy. Disminuye el estres por el bochorno.
+2026-11-03,L2,21,4,2,26.2,73.5,2,2,Hay bastante maleza entre los surcos que requiere limpieza. Plaga estancada.
+2026-11-04,L3,22,4,2,25.9,74.0,1,0,Control exitoso. El lote quedo libre de plagas con el clima fresco de noviembre.
+2026-11-05,L4,23,4,3,25.7,75.0,2,1,Revision final del ciclo. Todas las variables estan dentro de lo esperado.
