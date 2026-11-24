@@ -1,113 +1,160 @@
-            st.table(res["tl"])
+        pred = int(modelo.predict(X)[0])
+        prob = None
 
-        buf = io.BytesIO()
-        joblib.dump(res["modelo"], buf)
-        d1, d2, d3 = st.columns(3)
-        d1.download_button(
-            "Descargar modelo", buf.getvalue(), "modelo_final.joblib"
-        )
-        d2.download_button(
-            "Descargar ficha del modelo",
-            json.dumps(m, ensure_ascii=False, indent=2),
-            "modelo_final.json", mime="application/json"
-        )
-        d3.download_button(
-            "Descargar métricas",
-            res["tg"].to_csv(index=False).encode("utf-8-sig"),
-            "metricas_globales.csv", mime="text/csv"
-        )
+        if hasattr(modelo, "predict_proba") and 1 in list(modelo.classes_):
+            prob = float(
+                modelo.predict_proba(X)[0][list(modelo.classes_).index(1)]
+            )
 
-    if st.checkbox("Ver cómo cambia el resultado al usar más fechas de visita"):
-        curva = E.curva_aprendizaje(df, vars_)
-        if curva is None:
-            st.info(
-                "Se necesitan al menos 4 fechas de visita con variedad de clases "
-                "en varios lotes."
+        if pred == 1:
+            st.error("**Riesgo ALTO de plaga**")
+            st.write(
+                "Conviene inspeccionar el lote con prioridad (muestreo de tallos), "
+                "registrar el nivel de plaga observado y consultar a un ingeniero "
+                "agrónomo antes de decidir una aplicación."
             )
         else:
-            st.line_chart(curva)
-            st.caption(
-                "F1 de la clase riesgo alto al usar las primeras N fechas. "
-                "Con pocos registros la curva puede subir y bajar: sirve para ver "
-                "si más datos ayudan, no para prometerlo."
+            st.success("**Riesgo BAJO de plaga**")
+            st.write(
+                "Se sugiere mantener el monitoreo periódico del lote. "
+                "Este resultado no garantiza la ausencia de plagas."
             )
 
+        if prob is not None:
+            st.metric("Probabilidad estimada de riesgo alto", f"{prob:.0%}")
 
-def pestana_acerca(modelo, meta):
-    st.subheader("Acerca del prototipo")
-    st.write(
-        "Herramienta de apoyo para estimar el **riesgo de plagas (bajo o alto)** "
-        "en lotes de alfalfa del Valle Jequetepeque, a partir de variables de "
-        "manejo (días desde el corte, riegos, fumigaciones, maleza) y de clima "
-        "(temperatura y humedad). El riesgo alto corresponde a un nivel de plaga "
-        "observado de 2 o 3 en una escala de 0 a 3."
-    )
+        titulo, detalle = explicar(modelo, X, vars_)
+        if titulo:
+            with st.expander("¿Por qué este resultado?"):
+                st.write(f"**{titulo}**")
+                if isinstance(detalle, list):
+                    for linea in detalle:
+                        st.write("• " + linea)
+                else:
+                    st.bar_chart(detalle)
 
-    sesion = st.session_state.get("entrenado")
-    if sesion is not None:
-        meta = sesion["meta"]
-
-    if meta:
-        st.write(
-            f"**Modelo cargado:** {meta.get('modelo', 'desconocido')}. "
-            f"**Variables:** {', '.join(meta.get('variables', []))}."
-        )
-
-    f_met = RUTA_MODELO / "metricas_globales.csv"
-    if sesion is not None:
-        st.write("**Métricas de validación** (modelo entrenado en esta sesión):")
-        st.table(sesion["tg"])
-    elif f_met.exists():
-        st.write("**Métricas de validación** (cada lote se reservó una vez como prueba):")
-        st.table(pd.read_csv(f_met))
-    else:
         st.caption(
-            "Las métricas aparecerán aquí cuando se copie "
-            "`metricas_globales.csv` a la carpeta `modelo/`."
+            "Prototipo de apoyo a la decisión entrenado con pocos registros: "
+            "no sustituye al técnico agrónomo."
         )
 
-    st.write("**Limitaciones**")
+
+def pestana_registro():
     st.write(
-        "• Estudio piloto con 4 lotes y pocos registros: las métricas son "
-        "inestables y no se pueden generalizar a todo el valle.\n\n"
-        "• Los cuatro lotes se cortan el mismo día, por lo que el efecto de "
-        "la fase del ciclo no se separa del efecto del clima de esas semanas.\n\n"
-        "• No identifica especies de plagas; estima el nivel de daño.\n\n"
-        "• No sustituye al ingeniero agrónomo."
-    )
-    st.caption(
-        "Universidad Nacional de Trujillo, Facultad de Ciencias Físicas y Matemáticas. "
-        "V. M. Suclupe Tirado, D. J. Vásquez Silva y J. Bytton Alcántara, 2026."
+        "Ficha digital: registra cada visita a un lote. Al terminar, "
+        "**descarga el CSV**: los datos de esta pantalla se pierden si cierras la página."
     )
 
+    if "registros" not in st.session_state:
+        st.session_state.registros = []
 
-def main():
-    aplicar_estilo()
+    with st.form("ficha", clear_on_submit=False):
+        c1, c2 = st.columns(2)
+        fecha = c1.date_input("Fecha de la visita", value=date.today())
+        lote = c2.text_input("Lote", value="L1")
 
-    st.markdown("""
-    <div class="encabezado">
-        <div class="etiqueta">🌿 SISTEMA DE MONITOREO AGRÍCOLA</div>
-        <h1>Riesgo de plagas en alfalfa</h1>
-        <p>Valle Jequetepeque, La Libertad · Prototipo de apoyo a la decisión</p>
-    </div>
-    """, unsafe_allow_html=True)
+        valores = {}
+        for v in [
+            "dias_desde_corte", "riegos_ciclo",
+            "fumigaciones_ciclo", "temp_media_c"
+        ]:
+            valores[v] = campo(v, f"reg_{v}")
 
-    modelo, meta, error = cargar_modelo()
-    t1, t2, t3, t4 = st.tabs([
-        "📝 Registrar visita",
-        "🧠 Entrenar con mis datos",
-        "🌱 Estimar riesgo",
-        "ℹ️ Acerca de"
-    ])
+        con_hum = st.checkbox("Tengo el dato de humedad relativa")
+        hum = campo("humedad_media_pct", "reg_humedad_media_pct")
+        valores["cobertura_maleza"] = campo(
+            "cobertura_maleza", "reg_cobertura_maleza"
+        )
 
-    with t1:
-        pestana_registro()
-    with t2:
-        pestana_entrenar()
-    with t3:
-        pestana_estimar(modelo, meta, error)
-    with t4:
-        pestana_acerca(modelo, meta)
+        nivel = st.selectbox(
+            "Nivel de plaga observado",
+            list(NIVELES_PLAGA.keys()),
+            format_func=lambda k: NIVELES_PLAGA[k],
+            key="reg_nivel",
+            help="Usa los criterios acordados con el ingeniero agrónomo."
+        )
+        obs = st.text_area(
+            "Observaciones (fotos tomadas, producto aplicado, incidencias)"
+        )
+        guardar = st.form_submit_button("Guardar visita", type="primary")
+
+    if guardar:
+        if not lote.strip():
+            st.error("Escribe el nombre del lote.")
+        else:
+            st.session_state.registros.append({
+                "fecha": fecha.isoformat(),
+                "lote": lote.strip(),
+                "dias_desde_corte": valores["dias_desde_corte"],
+                "riegos_ciclo": valores["riegos_ciclo"],
+                "fumigaciones_ciclo": valores["fumigaciones_ciclo"],
+                "temp_media_c": valores["temp_media_c"],
+                "humedad_media_pct": hum if con_hum else None,
+                "cobertura_maleza": valores["cobertura_maleza"],
+                "nivel_plaga": nivel,
+                "observaciones": obs.strip()
+            })
+            st.success("Visita guardada.")
+
+    df = pd.DataFrame(st.session_state.registros, columns=COLUMNAS)
+    st.write(f"**Registros en esta sesión: {len(df)}**")
+
+    if len(df):
+        st.table(df)
+        a, b = st.columns(2)
+        csv = df.to_csv(index=False).encode("utf-8-sig")
+        a.download_button(
+            "Descargar CSV", csv,
+            file_name="registros_alfalfa.csv", mime="text/csv"
+        )
+        if b.button("Eliminar el último registro"):
+            st.session_state.registros.pop()
+            st.rerun()
+
+    with st.expander("Continuar con un CSV descargado antes"):
+        subido = st.file_uploader("Archivo CSV", type="csv")
+        if subido is not None and st.button("Cargar registros del archivo"):
+            previo = pd.read_csv(subido)
+            faltan = [c for c in COLUMNAS if c not in previo.columns]
+            if faltan:
+                st.error(f"Al archivo le faltan columnas: {faltan}")
+            else:
+                previo = previo[COLUMNAS].astype(object).where(
+                    previo[COLUMNAS].notna(), None
+                )
+                st.session_state.registros = previo.to_dict("records")
+                st.rerun()
 
 
-main()
+def pestana_entrenar():
+    st.write(
+        "Aquí el programa **aprende de tus visitas**: busca qué condiciones "
+        "se asociaban con más plaga y guarda ese aprendizaje en un modelo, "
+        "que luego usa la pestaña *Estimar riesgo*. Entre más fechas de visita "
+        "registres, más ejemplos tiene para aprender."
+    )
+
+    fuente = st.radio(
+        "¿De dónde tomo los datos?",
+        ["Registros de esta sesión", "Subir un archivo (CSV o Excel)"]
+    )
+    crudo = None
+
+    if fuente.startswith("Registros"):
+        if st.session_state.get("registros"):
+            crudo = pd.DataFrame(st.session_state["registros"])
+        else:
+            st.info(
+                "Aún no hay registros en esta sesión. Guarda visitas en "
+                "**Registrar visita** o sube un archivo."
+            )
+    else:
+        arch = st.file_uploader(
+            "Archivo con las visitas (CSV, o Excel con la hoja 'Datos')",
+            type=["csv", "xlsx"], key="subida_entrenar"
+        )
+        if arch is not None:
+            try:
+                crudo = (
+                    pd.read_excel(arch, sheet_name="Datos")
+                    if arch.name.lower().endswith("xlsx")
